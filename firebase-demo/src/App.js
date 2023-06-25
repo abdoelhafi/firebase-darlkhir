@@ -16,32 +16,31 @@ const firebaseConfig = {
 
 };
 
-
 function App() {
 
   // Initialize Firebase APP
-  //console.log(firebase)
-  console.log(firebase.apps)
   if (firebase.apps.length == 0) {
     firebase.initializeApp(firebaseConfig);
   }
 
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true)
+
   useEffect(() => {
     fetchItems();
   }, []);
 
   // GET REQUEST : FETCH DATA FROM THE DATABASE
- 
-  const fetchItems = async () => {
+  const fetchItems = () => {
     try {
       firebase.database().ref("/activities").on("value",res => {
-
-        const eltValue = res.val()
-        setItems(eltValue)
+        let resData = []
+        const dataObject = res.val()
+        for (var elementKey in dataObject){
+          resData.push(dataObject[elementKey])
+        }
+        setItems(resData)
         setLoading(false)
-        console.log("the result", items)
       })
     } catch (error) {
       console.error('Error fetching items:', error);
@@ -49,18 +48,39 @@ function App() {
   };
 
   // ADD DATA TO THE DATABASE
-  const addItems = () => {
-
+  const addItem = () => {
+    const dataToAdd = {
+      photo: "https://static.vecteezy.com/system/resources/previews/002/774/528/original/teamwork-illustration-concept-worker-helping-each-other-for-business-group-free-vector.jpg",
+      title: "let's make morooco great again",
+      description: "activity of making morocco  great again"
+    }
+    firebase.database().ref("/activities").push(dataToAdd, error => {
+      if(!error) {
+        console.log("succeffuly added item to the database")
+      }else{
+        console.log("error occured")
+      }
+    })
   }
   // DELETE FROM DATABASE
-  const DeleteItems = () => {
-    
+  const DeleteItem = () => {
+    const itemToDeleteId = "-NYn_T_UyfD-ud1lmHnu"
+    firebase.
+    database()
+    .ref("/activities")
+    .child(itemToDeleteId)
+    .remove()
+    .then(()=>{
+      console.log("succefully deleted item with Id:", itemToDeleteId )
+    }).catch(error =>{
+      console.log(error)
+    });
   }
 
   return (
      loading ? <h1>LOADING</h1> : <div className="App">
       <div className="App-header">
-        <h1>Darlkhir Firebase Demo</h1>
+        <h1>Darlkhir Firebase workshop</h1>
         <h4>Fetch results: Get Request. </h4>
         <div className="item-list" style={{ display: 'flex', flexWrap:'wrap',margin:"auto"}}>
       {items.map((item, index) => (
@@ -80,15 +100,26 @@ function App() {
         </div>
       ))}
     </div>
-    <button style={buttonStyles}>Create Activity</button>
+    <button onClick={addItem} style={addButtonStyles}>Create Activity</button>
+    <button onClick={DeleteItem} style={deleteButtonStyles}>delete Activity</button>
+
       </div>
     </div>
   );
 }
-const buttonStyles = {
+const addButtonStyles = {
   padding: '10px 20px',
   backgroundColor: '#4CAF50',
   color: 'white',
+  fontSize: '16px',
+  border: 'none',
+  borderRadius: '4px',
+  cursor: 'pointer',
+};
+const deleteButtonStyles = {
+  padding: '10px 20px',
+  backgroundColor: '#yellow',
+  color: 'red',
   fontSize: '16px',
   border: 'none',
   borderRadius: '4px',
