@@ -1,46 +1,68 @@
 import logo from './logo.svg';
 import React, { useEffect, useState } from 'react';
-
+// Import initializeApp from firebase
+import firebase from 'firebase/app';
+import 'firebase/database'
 import './App.css';
+// firebase config object
+const firebaseConfig = {
+
+  apiKey: "AIzaSyBkP44I11K_3f8bWdlbSsmVKiolVEs7HK8",
+  authDomain: "fir-demo-workshop-a6de4.firebaseapp.com",
+  projectId: "fir-demo-workshop-a6de4",
+  storageBucket: "fir-demo-workshop-a6de4.appspot.com",
+  messagingSenderId: "98054027226",
+  appId: "1:98054027226:web:28deffd0c11356fec0f2e3"
+
+};
+
 
 function App() {
-  const [items, setItems] = useState([]);
 
+  // Initialize Firebase APP
+  //console.log(firebase)
+  console.log(firebase.apps)
+  if (firebase.apps.length == 0) {
+    firebase.initializeApp(firebaseConfig);
+  }
+
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true)
   useEffect(() => {
     fetchItems();
   }, []);
 
+  // GET REQUEST : FETCH DATA FROM THE DATABASE
+ 
   const fetchItems = async () => {
     try {
-      //const response = await fetch('https://api.example.com/items');
-      //const data = await response.json();
-      const data = [{
-        photo: "https://static.vecteezy.com/system/resources/previews/002/774/528/original/teamwork-illustration-concept-worker-helping-each-other-for-business-group-free-vector.jpg",
-        title: "let's make morooco great again",
-        description: "activity of making morocco  great again"
-      },
-      {
-        photo: "https://static.vecteezy.com/system/resources/previews/002/774/528/original/teamwork-illustration-concept-worker-helping-each-other-for-business-group-free-vector.jpg",
-        title: "let's make morooco great again",
-        description: "activity of making morocco  great again"
-      },
-      {
-        photo: "https://static.vecteezy.com/system/resources/previews/002/774/528/original/teamwork-illustration-concept-worker-helping-each-other-for-business-group-free-vector.jpg",
-        title: "let's make morooco great again",
-        description: "activity of making morocco  great again"
-      }]
-      setItems(data);
+      firebase.database().ref("/activities").on("value",res => {
+
+        const eltValue = res.val()
+        setItems(eltValue)
+        setLoading(false)
+        console.log("the result", items)
+      })
     } catch (error) {
       console.error('Error fetching items:', error);
     }
   };
 
+  // ADD DATA TO THE DATABASE
+  const addItems = () => {
+
+  }
+  // DELETE FROM DATABASE
+  const DeleteItems = () => {
+    
+  }
+
   return (
-    <div className="App">
+     loading ? <h1>LOADING</h1> : <div className="App">
       <div className="App-header">
         <h1>Darlkhir Firebase Demo</h1>
         <h4>Fetch results: Get Request. </h4>
-        <div className="item-list" style={{ display: 'flex', "flex-wrap":'wrap',margin:"auto"}}>
+        <div className="item-list" style={{ display: 'flex', flexWrap:'wrap',margin:"auto"}}>
       {items.map((item, index) => (
         <div className="item" key={index}>
           <img
@@ -58,9 +80,18 @@ function App() {
         </div>
       ))}
     </div>
+    <button style={buttonStyles}>Create Activity</button>
       </div>
     </div>
   );
 }
-
+const buttonStyles = {
+  padding: '10px 20px',
+  backgroundColor: '#4CAF50',
+  color: 'white',
+  fontSize: '16px',
+  border: 'none',
+  borderRadius: '4px',
+  cursor: 'pointer',
+};
 export default App;
